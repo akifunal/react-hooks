@@ -6,7 +6,7 @@ import {useEffect, useRef, useState} from 'react'
 const useLocalStorageState = (
   key,
   defaultValue = '',
-  {serialize = JSON.stringify, deserialize = JSON.parse},
+  {serialize = JSON.stringify, deserialize = JSON.parse} = {},
 ) => {
   // 🐨 initialize the state to the value from localStorage
   // 💰 window.localStorage.getItem('name') || initialName
@@ -14,7 +14,7 @@ const useLocalStorageState = (
   // 🐨 Here's where you'll use `React.useEffect`.
   // The callback should set the `name` in localStorage.
   // 💰 window.localStorage.setItem('name', name)
-
+  debugger
   const [state, setState] = useState(() => {
     const valueInLocalStorage = window.localStorage.getItem(key)
 
@@ -26,6 +26,7 @@ const useLocalStorageState = (
         window.localStorage.removeItem(key)
       }
     }
+
     return typeof defaultValue === 'function' ? defaultValue() : defaultValue
   })
 
@@ -49,10 +50,10 @@ const useLocalStorageState = (
 
 function Greeting({initialName = ''}) {
   const [name, setName] = useLocalStorageState('name', initialName)
-
   function handleChange(event) {
     setName(event.target.value)
   }
+
   return (
     <div>
       <form>
@@ -64,8 +65,13 @@ function Greeting({initialName = ''}) {
   )
 }
 
+function setTest() {
+  console.log('setTest run')
+  return 'test'
+}
+
 function App() {
-  return <Greeting />
+  return <Greeting initialName={setTest} />
 }
 
 export default App
