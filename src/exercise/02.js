@@ -1,9 +1,13 @@
 // useEffect: persistent state
 // http://localhost:3000/isolated/exercise/02.js
 
-import {useEffect, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 
-const useLocalStorageState = (key, defaultValue = '') => {
+const useLocalStorageState = (
+  key,
+  defaultValue = '',
+  {serialize = JSON.stringify, deserialize = JSON.parse},
+) => {
   // 🐨 initialize the state to the value from localStorage
   // 💰 window.localStorage.getItem('name') || initialName
 
@@ -12,19 +16,33 @@ const useLocalStorageState = (key, defaultValue = '') => {
   // 💰 window.localStorage.setItem('name', name)
 
   const [state, setState] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key)
-      return item ? JSON.parse(item) : defaultValue
-    } catch (error) {
-      console.log(error)
-      return defaultValue
+    const valueInLocalStorage = window.localStorage.getItem(key)
+
+    if (valueInLocalStorage) {
+      try {
+        return deserialize(valueInLocalStorage)
+      } catch (error) {
+        console.log(error)
+        window.localStorage.removeItem(key)
+      }
     }
+    return typeof defaultValue === 'function' ? defaultValue() : defaultValue
   })
 
+  const prevKeyRef = useRef(key)
+
   useEffect(() => {
+    const prevKey = prevKeyRef.current
+    if (prevKey !== key) {
+      window.localStorage.removeItem(prevKey)
+    }
+
+    // 🐨 update prevKeyRef to the current key
+    prevKeyRef.current = key
+
     // 🐨 set the name in localStorage
-    window.localStorage.setItem(key, JSON.stringify(state))
-  }, [key, state])
+    window.localStorage.setItem(key, serialize(state))
+  }, [key, serialize, state])
 
   return [state, setState]
 }
