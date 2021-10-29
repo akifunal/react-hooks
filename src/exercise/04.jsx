@@ -5,8 +5,10 @@ import {useLocalStorageState} from '../utils.js'
 
 function Board({squares, onSquareClick}) {
   function renderSquare(i) {
+    const handleSquareClick = () => onSquareClick(i)
+
     return (
-      <button className="square" onClick={() => onSquareClick(i)}>
+      <button className="square" onClick={handleSquareClick}>
         {squares[i]}
       </button>
     )
@@ -47,7 +49,7 @@ function Game() {
   const winner = calculateWinner(currentSquares)
   const status = calculateStatus(winner, currentSquares, nextValue)
 
-  function selectSquare(square) {
+  const selectSquare = square => {
     if (winner || currentSquares[square]) {
       return
     }
@@ -61,7 +63,7 @@ function Game() {
     setCurrentStep(newHistory.length)
   }
 
-  function restart() {
+  const restart = () => {
     setHistory([Array(9).fill(null)])
     setCurrentStep(0)
   }
@@ -69,6 +71,7 @@ function Game() {
   const moves = history.map((stepSquares, step) => {
     const desc = step ? `Go to move #${step}` : 'Go to game start'
     const isCurrentStep = step === currentStep
+
     return (
       <li key={step}>
         <button disabled={isCurrentStep} onClick={() => setCurrentStep(step)}>
