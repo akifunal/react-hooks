@@ -2,12 +2,40 @@
 // 💯 (alternate) migrate from classes
 // http://localhost:3000/isolated/exercise/05-classes.js
 
-import * as React from 'react'
+// useRef and useEffect: DOM interaction
+// 💯 (alternate) migrate from classes
+// http://localhost:3000/isolated/exercise/05-classes.js
+import {useEffect, useRef} from 'react'
 import VanillaTilt from 'vanilla-tilt'
 
 // If you'd rather practice refactoring a class component to a function
 // component with hooks, then go ahead and do this exercise.
 
+const Tilt = ({children}) => {
+  const tiltRef = useRef()
+
+  useEffect(() => {
+    const tiltNode = tiltRef.current
+    VanillaTilt.init(tiltNode, {
+      max: 25,
+      speed: 400,
+      glare: true,
+      'max-glare': 0.5,
+    })
+
+    // @ts-ignore
+    return () => tiltNode.vanillaTilt.destroy()
+  }, [])
+
+  return (
+    <div ref={tiltRef} className="tilt-root">
+      <div className="tilt-child">{children}</div>
+    </div>
+  )
+}
+
+//#region Tilt class component
+/*
 class Tilt extends React.Component {
   tiltRef = React.createRef()
   componentDidMount() {
@@ -31,6 +59,9 @@ class Tilt extends React.Component {
     )
   }
 }
+*/
+//#endregion
+
 function App() {
   return (
     <Tilt>
