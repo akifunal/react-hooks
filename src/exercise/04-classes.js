@@ -2,14 +2,72 @@
 // 💯 (alternate) migrate from classes
 // http://localhost:3000/isolated/exercise/04-classes.js
 
-import * as React from 'react'
-
+import {useLocalStorageState} from '../utils'
 // If you'd rather practice refactoring a class component to a function
 // component with hooks, then go ahead and do this exercise.
 
 // 🦉 You've learned all the hooks you need to know to refactor this Board
 // component to hooks. So, let's make it happen!
 
+function Board() {
+  const [squares, setSquares] = useLocalStorageState(
+    'squares',
+    Array(9).fill(null),
+  )
+
+  const nextValue = calculateNextValue(squares)
+  const winner = calculateWinner(squares)
+  let status = calculateStatus(winner, squares, nextValue)
+
+  function selectSquare(square) {
+    const nextValue = calculateNextValue(squares)
+    if (calculateWinner(squares) || squares[square]) {
+      return
+    }
+    const squaresCopy = [...squares]
+    squaresCopy[square] = nextValue
+    setSquares(squaresCopy)
+  }
+
+  function renderSquare(i) {
+    return (
+      <button className="square" onClick={() => selectSquare(i)}>
+        {squares[i]}
+      </button>
+    )
+  }
+
+  function restart() {
+    setSquares(Array(9).fill(null))
+  }
+
+  return (
+    <div>
+      <div className="status">{status}</div>
+      <div className="board-row">
+        {renderSquare(0)}
+        {renderSquare(1)}
+        {renderSquare(2)}
+      </div>
+      <div className="board-row">
+        {renderSquare(3)}
+        {renderSquare(4)}
+        {renderSquare(5)}
+      </div>
+      <div className="board-row">
+        {renderSquare(6)}
+        {renderSquare(7)}
+        {renderSquare(8)}
+      </div>
+      <button className="restart" onClick={restart}>
+        restart
+      </button>
+    </div>
+  )
+}
+
+//#region Board class component
+/*
 class Board extends React.Component {
   state = {
     squares:
@@ -82,6 +140,8 @@ class Board extends React.Component {
     )
   }
 }
+*/
+//#endregion
 
 function Game() {
   return (
