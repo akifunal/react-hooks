@@ -13,6 +13,13 @@ import {
   PokemonInfoFallback,
 } from '../pokemon'
 
+const Status = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+}
+
 function PokemonInfo({pokemonName}) {
   // 🐨 Have state for the pokemon (null)
   // const [status, setStatus] = useState('idle')
@@ -20,7 +27,7 @@ function PokemonInfo({pokemonName}) {
   const [state, setState] = useState({
     error: null,
     pokemon: null,
-    status: 'idle',
+    status: Status.IDLE,
   })
   const {error, pokemon, status} = state
   // const [error, setError] = useState(null)
@@ -37,13 +44,17 @@ function PokemonInfo({pokemonName}) {
   useEffect(() => {
     if (!pokemonName) return
 
-    setState(prevState => ({...prevState, status: 'pending'}))
+    setState(prevState => ({...prevState, status: Status.PENDING}))
     fetchPokemon(pokemonName)
       .then(pokemon => {
-        setState(prevState => ({...prevState, status: 'resolved', pokemon}))
+        setState(prevState => ({
+          ...prevState,
+          status: Status.RESOLVED,
+          pokemon,
+        }))
       })
       .catch(error => {
-        setState(prevState => ({...prevState, status: 'rejected', error}))
+        setState(prevState => ({...prevState, status: Status.REJECTED, error}))
       })
   }, [pokemonName])
 
@@ -60,21 +71,22 @@ function PokemonInfo({pokemonName}) {
   //   return <PokemonDataView pokemon={pokemon} />
   // }
 
-  if (status === 'idle') {
+  if (status === Status.IDLE) {
     return 'Submit a pokemon'
-  } else if (status === 'pending') {
+  } else if (status === Status.PENDING) {
     return <PokemonInfoFallback name={pokemonName} />
-  } else if (status === 'rejected') {
+  } else if (status === Status.REJECTED) {
     return (
       <div role="alert">
         There was an error:{' '}
         <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
       </div>
     )
-  } else if (status === 'resolved') {
+  } else if (status === Status.RESOLVED) {
     return <PokemonDataView pokemon={pokemon} />
   }
 
+  throw new Error('Impossible status')
   // if (error) {
   //   return (
   //     <div role="alert">
