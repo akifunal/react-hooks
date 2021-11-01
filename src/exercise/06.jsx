@@ -5,7 +5,7 @@
 // PokemonInfoFallback: the thing we show while we're loading the pokemon info
 // PokemonDataView: the stuff we use to display the pokemon info
 import {useEffect, useState, Component} from 'react'
-import {ErrorBoundary} from 'react-error-boundary'
+import {ErrorBoundary, useErrorHandler} from 'react-error-boundary'
 import {
   fetchPokemon,
   PokemonDataView,
@@ -42,44 +42,43 @@ const Status = {
 
 function PokemonInfo({pokemonName}) {
   const [state, setState] = useState({
-    error: null,
     pokemon: null,
     status: pokemonName ? Status.PENDING : Status.IDLE,
   })
-  const {error, pokemon, status} = state
+  const {pokemon, status} = state
+  const handleError = useErrorHandler()
   useEffect(() => {
     if (!pokemonName) return
 
     setState(prevState => ({...prevState, status: Status.PENDING}))
-    fetchPokemon(pokemonName)
-      .then(pokemon => {
+    fetchPokemon(pokemonName).then(
+      pokemon => {
         setState(prevState => ({
           ...prevState,
           status: Status.RESOLVED,
           pokemon,
         }))
-      })
-      .catch(error => {
-        setState(prevState => ({...prevState, status: Status.REJECTED, error}))
-      })
-  }, [pokemonName])
-
-  // 🐨 return the following things based on the `pokemon` state and `pokemonName` prop:
-  //   1. no pokemonName: 'Submit a pokemon'
-  //   2. pokemonName but no pokemon: <PokemonInfoFallback name={pokemonName} />
-  //   3. pokemon: <PokemonDataView pokemon={pokemon} />
+      },
+      error => handleError(error),
+    )
+    // .catch(error => {
+    // // setState(prevState => ({...prevState, status: Status.REJECTED, error}))
+    //   handleError(error)
+    // })
+  }, [handleError, pokemonName])
 
   if (status === Status.IDLE) {
     return 'Submit a pokemon'
   } else if (status === Status.PENDING) {
     return <PokemonInfoFallback name={pokemonName} />
-  } else if (status === Status.REJECTED) {
-    throw error
   } else if (status === Status.RESOLVED) {
     return <PokemonDataView pokemon={pokemon} />
   }
+  // else if (status === Status.REJECTED) {
+  //   throw error
+  // }
 
-  throw new Error('Impossible status')
+  throw Error('Impossible status')
 }
 
 function ErrorFallBack({error, resetErrorBoundary}) {
