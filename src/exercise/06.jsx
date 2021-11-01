@@ -44,10 +44,9 @@ function PokemonInfo({pokemonName}) {
   const [state, setState] = useState({
     error: null,
     pokemon: null,
-    status: Status.IDLE,
+    status: pokemonName ? Status.PENDING : Status.IDLE,
   })
   const {error, pokemon, status} = state
-
   useEffect(() => {
     if (!pokemonName) return
 
