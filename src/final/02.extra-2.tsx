@@ -13,8 +13,8 @@ function Greeting({initialName = ''}) {
     window.localStorage.setItem('name', name)
   }, [name])
 
-  function handleChange(event) {
-    setName(event.target.value)
+  function handleChange(event: React.SyntheticEvent<HTMLInputElement>) {
+    setName(event.currentTarget.value)
   }
 
   return (

@@ -33,6 +33,7 @@ self.addEventListener('message', async function (event) {
   }
 
   const allClients = await self.clients.matchAll()
+  const allClientIds = allClients.map(client => client.id)
 
   switch (event.data) {
     case 'KEEPALIVE_REQUEST': {
@@ -66,9 +67,7 @@ self.addEventListener('message', async function (event) {
     }
 
     case 'CLIENT_CLOSED': {
-      activeClientIds.delete(clientId)
-
-      const remainingClients = allClients.filter((client) => {
+      const remainingClients = allClients.filter(client => {
         return client.id !== clientId
       })
 
@@ -82,12 +81,11 @@ self.addEventListener('message', async function (event) {
   }
 })
 
-// Resolve the "master" client for the given event.
-// Client that issues a request doesn't necessarily equal the client
-// that registered the worker. It's with the latter the worker should
-// communicate with during the response resolving phase.
-async function resolveMasterClient(event) {
-  const client = await self.clients.get(event.clientId)
+self.addEventListener('fetch', function (event) {
+  const {clientId, request} = event
+  const requestId = uuidv4()
+  const requestClone = request.clone()
+  const getOriginalResponse = () => fetch(requestClone)
 
   if (client.frameType === 'top-level') {
     return client
@@ -134,8 +132,9 @@ async function handleRequest(event, requestId) {
     })()
   }
 
-  return response
-}
+  event.respondWith(
+    new Promise(async (resolve, reject) => {
+      const client = await event.currentTarget.clients.get(clientId)
 
 async function getResponse(event, client, requestId) {
   const { request } = event
@@ -202,9 +201,10 @@ async function getResponse(event, client, requestId) {
       )
     }
 
-    case 'MOCK_NOT_FOUND': {
-      return getOriginalResponse()
-    }
+        case 'NETWORK_ERROR': {
+          const {name, message} = clientMessage.payload
+          const networkError = new Error(message)
+          networkError.name = name
 
     case 'NETWORK_ERROR': {
       const { name, message } = clientMessage.payload
@@ -232,45 +232,27 @@ If you wish to mock an error response, please refer to this guide: https://mswjs
         request.url,
       )
 
-      return respondWithMock(clientMessage)
-    }
-  }
+          return resolve(createResponse(clientMessage))
+        }
+      }
+    })
+      .then(async response => {
+        const client = await event.currentTarget.clients.get(clientId)
+        const clonedResponse = response.clone()
 
   return getOriginalResponse()
 }
 
-self.addEventListener('fetch', function (event) {
-  const { request } = event
-
-  // Bypass navigation requests.
-  if (request.mode === 'navigate') {
-    return
-  }
-
-  // Opening the DevTools triggers the "only-if-cached" request
-  // that cannot be handled by the worker. Bypass such requests.
-  if (request.cache === 'only-if-cached' && request.mode !== 'same-origin') {
-    return
-  }
-
-  // Bypass all requests when there are no active clients.
-  // Prevents the self-unregistered worked from handling requests
-  // after it's been deleted (still remains active until the next reload).
-  if (activeClientIds.size === 0) {
-    return
-  }
-
-  const requestId = uuidv4()
-
-  return event.respondWith(
-    handleRequest(event, requestId).catch((error) => {
-      console.error(
-        '[MSW] Failed to mock a "%s" request to "%s": %s',
-        request.method,
-        request.url,
-        error,
-      )
-    }),
+        return response
+      })
+      .catch(error => {
+        console.error(
+          '[MSW] Failed to mock a "%s" request to "%s": %s',
+          request.method,
+          request.url,
+          error,
+        )
+      }),
   )
 })
 
@@ -288,7 +270,7 @@ function sendToClient(client, message) {
   return new Promise((resolve, reject) => {
     const channel = new MessageChannel()
 
-    channel.port1.onmessage = (event) => {
+    channel.port1.onmessage = event => {
       if (event.data && event.data.error) {
         return reject(event.data.error)
       }

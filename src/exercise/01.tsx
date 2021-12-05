@@ -1,13 +1,16 @@
 // useState: greeting
-// http://localhost:3000/isolated/final/01.js
+// http://localhost:3000/isolated/exercise/01.js
 
 import * as React from 'react'
 
 function Greeting() {
-  const [name, setName] = React.useState('')
-  function handleChange(event) {
-    setName(event.target.value)
+  // 💣 delete this variable declaration and replace it with a React.useState call
+  const name = ''
+
+  function handleChange(event: React.SyntheticEvent<HTMLInputElement>) {
+    // 🐨 update the name here based on event.currentTarget.value
   }
+
   return (
     <div>
       <form>

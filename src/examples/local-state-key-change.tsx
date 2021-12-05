@@ -19,8 +19,8 @@ function Greeting({initialName = ''}) {
     }
   }
 
-  function handleChange(event) {
-    setName(event.target.value)
+  function handleChange(event: React.SyntheticEvent<HTMLInputElement>) {
+    setName(event.currentTarget.value)
   }
 
   return (
