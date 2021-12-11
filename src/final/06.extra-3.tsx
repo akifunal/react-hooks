@@ -22,12 +22,15 @@ function PokemonInfo({pokemonName}) {
     if (!pokemonName) {
       return
     }
+    // @ts-ignore
     setState({status: 'pending'})
     fetchPokemon(pokemonName).then(
       pokemon => {
+        // @ts-ignore
         setState({status: 'resolved', pokemon})
       },
       error => {
+        // @ts-ignore
         setState({status: 'rejected', error})
       },
     )

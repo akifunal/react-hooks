@@ -18,6 +18,7 @@ class ErrorBoundary extends React.Component {
   render() {
     const {error} = this.state
     if (error) {
+      // @ts-ignore
       return <this.props.FallbackComponent error={error} />
     }
 
@@ -36,13 +37,15 @@ function PokemonInfo({pokemonName}) {
   React.useEffect(() => {
     if (!pokemonName) {
       return
-    }
+    } // @ts-ignore
     setState({status: 'pending'})
     fetchPokemon(pokemonName).then(
       pokemon => {
+        // @ts-ignore
         setState({status: 'resolved', pokemon})
       },
       error => {
+        // @ts-ignore
         setState({status: 'rejected', error})
       },
     )
@@ -83,6 +86,7 @@ function App() {
       <PokemonForm pokemonName={pokemonName} onSubmit={handleSubmit} />
       <hr />
       <div className="pokemon-info">
+        {/*  @ts-ignore */}
         <ErrorBoundary key={pokemonName} FallbackComponent={ErrorFallback}>
           <PokemonInfo pokemonName={pokemonName} />
         </ErrorBoundary>

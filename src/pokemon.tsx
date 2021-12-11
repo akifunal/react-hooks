@@ -211,6 +211,7 @@ function ErrorFallback({error, resetErrorBoundary}: FallbackProps) {
 }
 
 function PokemonErrorBoundary(props: ErrorBoundaryProps) {
+  // @ts-ignore
   return <ErrorBoundary FallbackComponent={ErrorFallback} {...props} />
 }
 

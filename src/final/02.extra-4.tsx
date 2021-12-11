@@ -22,6 +22,7 @@ function useLocalStorageState(
         window.localStorage.removeItem(key)
       }
     }
+    // @ts-ignore
     return typeof defaultValue === 'function' ? defaultValue() : defaultValue
   })
 

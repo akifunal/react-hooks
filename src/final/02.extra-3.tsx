@@ -20,6 +20,7 @@ function Greeting({initialName = ''}) {
   const [name, setName] = useLocalStorageState('name', initialName)
 
   function handleChange(event: React.SyntheticEvent<HTMLInputElement>) {
+    // @ts-ignore
     setName(event.currentTarget.value)
   }
 
@@ -27,6 +28,7 @@ function Greeting({initialName = ''}) {
     <div>
       <form>
         <label htmlFor="name">Name: </label>
+        {/* @ts-ignore */}
         <input value={name} onChange={handleChange} id="name" />
       </form>
       {name ? <strong>Hello {name}</strong> : 'Please type your name'}

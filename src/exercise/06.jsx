@@ -68,7 +68,7 @@ function PokemonInfo({pokemonName}) {
   }, [handleError, pokemonName])
 
   if (status === Status.IDLE) {
-    return 'Submit a pokemon'
+    return <>Submit a pokemon</>
   } else if (status === Status.PENDING) {
     return <PokemonInfoFallback name={pokemonName} />
   } else if (status === Status.RESOLVED) {
